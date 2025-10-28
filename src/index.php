@@ -1,14 +1,23 @@
 <?php
+// Since index.php is now in src/, paths change:
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
-$twig = new \Twig\Environment($loader);
+$cacheDir = __DIR__ . '/../cache';
+if (!is_dir($cacheDir)) {
+    mkdir($cacheDir, 0755, true);
+}
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// Templates are now in the same directory (src/templates)
+$loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
+$twig = new \Twig\Environment($loader, [
+    'cache' => $cacheDir,
+    'auto_reload' => true
+]);
+
+$uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
 switch ($uri) {
     case '/':
-    case '/index.php':
         echo $twig->render('pages/landing.twig', ['show_navbar' => true]);
         break;
     case '/sign-up':

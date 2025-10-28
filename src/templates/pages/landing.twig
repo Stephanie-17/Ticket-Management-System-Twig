@@ -1,0 +1,68 @@
+{% extends "base.twig" %}
+
+
+
+{% block content %}
+<section class="hero bg-gradient-to-br from-[#4a90e2] to-[#7b68ee] p-2 flex flex-col items-center justify-center h-[90vh] gap-(--space-xl)">
+  <h1 class="text-(--color-text-secondary) font-extrabold text-[32px] text-center z-2 mt-(--space-md) sm:text-5xl md:text-6xl max-w-[80%]">
+    Simplify Support. Resolve Faster. Delight Every Customer.
+  </h1>
+
+  <p class="text-white/80 text-center max-w-150.5 md:text-lg z-2">
+    FlowDesk is a comprehensive ticket management system designed to help teams handle customer requests with speed, clarity, and efficiency.
+    <br />
+    <b>Empower your team</b> to deliver exceptional support experiences while reducing response times and eliminating workflow friction.
+  </p>
+
+  <button id="get-started" class="text-white bg-(--color-primary) px-(--space-xl) py-(--space-sm) rounded-md font-bold cursor-pointer z-1150">
+    Get Started
+  </button>
+
+  <div class="w-16 h-16 bg-[#50E3C2] opacity-30 absolute rounded-full left-2 top-1/4 lg:w-24 lg:h-24"></div>
+  <div class="w-16 h-16 bg-[#50E3C2] opacity-30 absolute rounded-full right-2 lg:w-34 lg:h-34 top-[57%]"></div>
+</section>
+
+<section class="flex flex-col justify-center items-center text-center gap(--space-md) p-2 mt-(--space-lg)">
+  <header class="mb-14">
+    <h2 class="font-bold text-4xl mb-(--space-md)">Key Features</h2>
+    <p class="text-(--color-text-light) max-w-[500px]">
+      FlowDesk is designed to help you handle customer requests more efficiently. Here's how:
+    </p>
+  </header>
+
+  <ul class="list-none flex flex-col gap-(--space-md) lg:gap-(--space-lg) justify-center md:flex-row md:flex-wrap mb-8">
+    {% include "components/feature-card.twig" with {
+      iconPath: "./images/automated-icon.svg",
+		feature: "Automated Ticket Routing",
+		desc: "Eliminate manual sorting. FlowDesk automatically assigns tickets to the right team or agent based on priority, topic, and workload. We ensure that every request is handled by the right expert.",
+    } %}
+    {% include "components/feature-card.twig" with {
+      	iconPath: "./images/unified-icon.svg",
+			feature: "Unified Communication Hub",
+			desc: "Keep every conversation in one place. Email, chat, and internal notes all live within FlowDesk, giving your team full context and your customers faster, more personalized responses.",
+    } %}
+    {% include "components/feature-card.twig" with {
+      iconPath: "./images/analytics-icon.svg",
+			feature: "Actionable Analytics",
+			desc: "Track performance, measure response times, and uncover trends with intuitive analytics dashboards. FlowDesk turns data into insights you can act on to continuously improve service quality.",
+    } %}
+  </ul>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script type="module">
+import { AuthContext } from '../js/context/authContext.js';
+
+// Logout functionality for any button with data-logout attribute
+document.addEventListener('DOMContentLoaded', () => {
+    const logoutBtn = document.querySelector('[data-logout]');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => AuthContext.logout());
+    }
+});
+  document.getElementById('get-started').addEventListener('click', () => {
+    window.location.href = '/sign-up';
+  });
+</script>
+{% endblock %}

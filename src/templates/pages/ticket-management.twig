@@ -1,0 +1,220 @@
+{# src/templates/pages/tickets.twig #}
+{% extends "base.twig" %}
+
+{% block content %}
+<main class="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-4 sm:p-8 space-y-(--space-lg) mt-(--space-lg)">
+    <header class="flex mt-4 justify-between items-center mb-8 relative">
+        <h1 class="sm:text-4xl text-2xl font-extrabold text-gray-900 mb-4 sm:mb-0" id="user-tickets-title">
+            Loading...
+        </h1>
+        <div class="flex items-center gap-2 sm:gap-6">
+            <p class="text-(--color-text-light) cursor-pointer text-sm sm:text-base w-[60px] sm:w-fit hover:text-(--color-primary-light) transition-colors" id="create-task-btn">
+                + Create New Task
+            </p>
+            <button class="py-(--space-sm) w-[90px] bg-red-600 text-(--color-text-secondary) font-bold cursor-pointer rounded-md" id="logout-btn">
+                Log Out
+            </button>
+        </div>
+        <a class="absolute -top-8" href="/dashboard">
+            <p class="hover:text-black transition-colors text-(--color-text-light) text-sm">
+                &larr; Back to Dashboard
+            </p>
+        </a>
+    </header>
+
+    <section class="flex flex-col gap-(--space-md)" id="tickets-container">
+        <p class="text-(--color-text-light) italic">Loading tickets...</p>
+    </section>
+
+    {# Create Task Modal #}
+    <aside id="create-task-modal" class="hidden flex justify-center items-center z-50 w-full bg-black/70 top-0 bottom-0 right-0 fixed inset-0">
+        <div class="bg-white w-full max-w-[500px] p-8 rounded-md">
+            <h3 class="font-semibold text-4xl text-center mb-8">Add A Ticket</h3>
+            <form id="create-task-form" class="border-2 rounded-md p-5">
+                <div class="flex items-start flex-col gap-2">
+                    <label for="title" class="font-semibold text-xl">Title:</label>
+                    <input id="new-title" class="border-2 rounded-md p-2 w-full" type="text" required />
+                </div>
+                <div class="flex items-start flex-col gap-2">
+                    <label for="description" class="font-semibold text-xl">Description:</label>
+                    <input id="new-description" type="text" class="border-2 rounded-md p-2 w-full" required />
+                </div>
+                <button type="submit" class="bg-green-500 text-white py-2 rounded-md w-full font-bold text-xl hover:bg-green-600 cursor-pointer mt-6">
+                    Save
+                </button>
+            </form>
+        </div>
+        <button id="close-create-modal" class="bg-red-600 py-(--space-sm) px-(--space-lg) text-white rounded-md cursor-pointer absolute top-4 right-16">
+            Close
+        </button>
+    </aside>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script type="module">
+import { AuthContext } from "../../js/context/authContext.js";
+import { getTickets, updateTicket, deleteTicket, addTicket, initTickets } from "../../js/context/ticketContext.js";
+
+let currentEditId = null;
+let currentEditTitle = "";
+let currentEditDescription = "";
+let currentEditStatus = "";
+
+// Make functions globally available by attaching to window
+window.startEdit = (ticketId) => {
+    const tickets = getTickets();
+    const ticket = tickets.find(t => t.id == ticketId);
+    if (ticket) {
+        currentEditId = ticketId;
+        currentEditTitle = ticket.title;
+        currentEditDescription = ticket.description;
+        currentEditStatus = ticket.status;
+        renderTickets(tickets);
+    }
+};
+
+window.saveEdit = (ticketId) => {
+    const title = document.getElementById(`edit-title-${ticketId}`)?.value;
+    const description = document.getElementById(`edit-description-${ticketId}`)?.value;
+    const status = document.getElementById(`edit-status-${ticketId}`)?.value;
+
+    if (title && description && status) {
+        updateTicket(ticketId, {
+            title: title,
+            description: description,
+            status: status,
+        });
+
+        currentEditId = null;
+        currentEditTitle = "";
+        currentEditDescription = "";
+        currentEditStatus = "";
+        
+        renderTickets(getTickets());
+    }
+};
+
+window.deleteTicketHandler = (ticketId) => {
+    deleteTicket(ticketId);
+    renderTickets(getTickets());
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    initTickets();
+    const user = AuthContext.getUser();
+    const tickets = getTickets();
+
+    // Update user name in title
+    if (user && user.name) {
+        document.getElementById('user-tickets-title').textContent = `${user.name}'s Tickets`;
+    }
+
+    // Render tickets
+    renderTickets(tickets);
+
+    // Event listeners
+    document.getElementById('create-task-btn').addEventListener('click', () => {
+        document.getElementById('create-task-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        AuthContext.logout();
+    });
+
+    // Create task form handler
+    document.getElementById('create-task-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleCreateTask();
+    });
+
+    document.getElementById('close-create-modal').addEventListener('click', () => {
+        document.getElementById('create-task-modal').classList.add('hidden');
+    });
+});
+
+function renderTickets(tickets) {
+    const container = document.getElementById('tickets-container');
+    
+    if (tickets.length === 0) {
+        container.innerHTML = '<p class="text-(--color-text-light) italic">No tickets yet — create your first one!</p>';
+        return;
+    }
+
+    container.innerHTML = tickets.map(ticket => {
+        if (currentEditId === ticket.id) {
+            // Edit mode
+            return `
+                <div class="w-[60%] border flex flex-col p-8 rounded-md gap-(--space-md) shadow">
+                    <div class="flex items-start flex-col gap-2">
+                        <label class="font-semibold text-xl" for="title">Title:</label>
+                        <input class="border-2 rounded-md p-2 w-[90%]" type="text" value="${currentEditTitle}" id="edit-title-${ticket.id}" />
+                    </div>
+                    <div class="flex items-start flex-col gap-2">
+                        <label class="font-semibold text-xl" for="description">Description:</label>
+                        <input class="border-2 rounded-md p-2 w-[90%]" type="text" value="${currentEditDescription}" id="edit-description-${ticket.id}" />
+                    </div>
+                    <div class="flex items-start flex-col gap-2">
+                        <label class="font-semibold text-xl" for="status">Status:</label>
+                        <select class="border-2 rounded-md p-2 w-[90%]" name="status" id="edit-status-${ticket.id}">
+                            <option value="open" ${currentEditStatus === 'open' ? 'selected' : ''}>Open</option>
+                            <option value="in_progress" ${currentEditStatus === 'in_progress' ? 'selected' : ''}>in_progress</option>
+                            <option value="closed" ${currentEditStatus === 'closed' ? 'selected' : ''}>Closed</option>
+                        </select>
+                    </div>
+                    <button class="bg-green-500 text-white py-2 rounded-md w-[30%] hover:bg-green-600 cursor-pointer" onclick="saveEdit(${ticket.id})">
+                        Save
+                    </button>
+                </div>
+            `;
+        } else {
+            // Display mode
+            return `
+                <div class="flex min-[400px]:w-full flex-col sm:flex-row gap-6 sm:justify-between border-l-10 ${
+                    ticket.status === "open" ? "border-l-green-600" : 
+                    ticket.status === "in_progress" ? "border-l-amber-600" : 
+                    "border-l-gray-600"
+                } rounded-md shadow-lg p-4">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">${ticket.title}</h3>
+                        <p class="text-(--color-text-light)">${ticket.description}</p>
+                    </div>
+                    <div class="flex items-center gap-(--space-sm)">
+                        <span class="p-2 font-semibold rounded-lg ${
+                            ticket.status === "open" ? "bg-green-200 text-green-700" :
+                            ticket.status === "in_progress" ? "bg-amber-200 text-amber-700" :
+                            "bg-gray-200 text-gray-700"
+                        }">${ticket.status}</span>
+                        <button type="button" class="bg-(--color-primary-light) py-(--space-sm) px-(--space-lg) text-white rounded-md cursor-pointer" onclick="startEdit(${ticket.id})">
+                            Edit
+                        </button>
+                        <button type="button" class="bg-red-600 py-(--space-sm) px-(--space-lg) text-white rounded-md cursor-pointer" onclick="deleteTicketHandler(${ticket.id})">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    }).join('');
+}
+
+function handleCreateTask() {
+    const newTitle = document.getElementById('new-title').value;
+    const newDescription = document.getElementById('new-description').value;
+
+    if (!newTitle.trim() || !newDescription.trim()) return;
+
+    const newTicket = {
+        id: Date.now(),
+        title: newTitle,
+        description: newDescription,
+        status: "open",
+    };
+    
+    addTicket(newTicket);
+    document.getElementById('create-task-modal').classList.add('hidden');
+    document.getElementById('create-task-form').reset();
+    renderTickets(getTickets());
+}
+</script>
+{% endblock %}

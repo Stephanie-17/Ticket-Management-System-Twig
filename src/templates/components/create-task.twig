@@ -1,0 +1,22 @@
+{# src/templates/components/create_task.twig #}
+<aside id="create-task-modal" class="hidden flex justify-center items-center z-50 w-full bg-black/70 top-0 bottom-0 right-0 fixed inset-0">
+    <div class="bg-white w-full max-w-[500px] p-8 rounded-md">
+        <h3 class="font-semibold text-4xl text-center mb-8">Add A Ticket</h3>
+        <form id="create-task-form" class="border-2 rounded-md p-5">
+            <div class="flex items-start flex-col gap-2">
+                <label for="title" class="font-semibold text-xl">Title:</label>
+                <input id="new-title" class="border-2 rounded-md p-2 w-full" type="text" required />
+            </div>
+            <div class="flex items-start flex-col gap-2">
+                <label for="description" class="font-semibold text-xl">Description:</label>
+                <input id="new-description" type="text" class="border-2 rounded-md p-2 w-full" required />
+            </div>
+            <button type="submit" class="bg-green-500 text-white py-2 rounded-md w-full font-bold text-xl hover:bg-green-600 cursor-pointer mt-6">
+                Save
+            </button>
+        </form>
+    </div>
+    <button id="close-create-modal" class="bg-red-600 py-(--space-sm) px-(--space-lg) text-white rounded-md cursor-pointer absolute top-4 right-16">
+        Close
+    </button>
+</aside>

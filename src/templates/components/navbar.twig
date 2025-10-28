@@ -1,0 +1,33 @@
+<nav class="flex justify-between items-center p-3 lg:p-4 mb-4">
+  <h2 id="logo" class="font-bold text-3xl cursor-pointer">FlowDesk</h2>
+  <button
+    id="nav-action"
+    class="py-(--space-sm) bg-(--color-primary-light) px-(--space-md) rounded-md font-semibold text-(--color-text-secondary) cursor-pointer"
+  >
+    Sign Up
+  </button>
+</nav>
+
+<script type="module">
+  import  {AuthContext} from './js/context/authContext.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('nav-action');
+    const logo = document.getElementById('logo');
+    if (!btn || !logo) return;
+
+    logo.addEventListener('click', () => (window.location.href = '/'));
+
+    if (AuthContext.isAuthenticated()) {
+      btn.textContent = 'Log Out';
+      btn.classList.add('bg-red-600');
+      btn.addEventListener('click', () => {
+        AuthContext.logout();
+      });
+    } else {
+      btn.textContent = 'Sign Up';
+      btn.classList.add('bg-(--color-primary-light)');
+      btn.addEventListener('click', () => (window.location.href = '/sign-up'));
+    }
+  });
+</script>

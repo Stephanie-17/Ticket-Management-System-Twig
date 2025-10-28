@@ -1,0 +1,63 @@
+{# src/templates/pages/dashboard.twig #}
+{% extends "base.twig" %}
+
+{% block content %}
+<main class="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8 space-y-(--space-lg) mt-(--space-lg)">
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-4 sm:mb-0">
+        Welcome, <span id="user-name">Loading...</span>
+    </h1>
+    <p class="text-lg text-gray-600 mt-3">
+        Here you can manage your tickets, view analytics, and make adjustments
+    </p>
+
+    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="ticket-stats">
+        <li class="bg-blue-100 hover:bg-blue-200 p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-200 ease-in-out transform hover:scale-105">
+            <h2 class="text-xl font-semibold text-blue-800">Total Tickets</h2>
+            <p class="text-shadow-gray-700 mt-2 text-xl" id="total-tickets">0</p>
+        </li>
+        <li class="bg-green-100 hover:bg-green-200 p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-200 ease-in-out transform hover:scale-105">
+            <h2 class="text-xl font-semibold text-green-800">Total Open Tickets</h2>
+            <p class="text-shadow-gray-700 mt-2 text-xl" id="open-tickets">0</p>
+        </li>
+        <li class="bg-amber-100 hover:bg-amber-200 p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-200 ease-in-out transform hover:scale-105">
+            <h2 class="text-xl font-semibold text-amber-800">Total Tickets In_Progress</h2>
+            <p class="text-shadow-gray-700 mt-2 text-xl" id="inprogress-tickets">0</p>
+        </li>
+        <li class="bg-gray-100 hover:bg-gray-200 p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-200 ease-in-out transform hover:scale-105">
+            <h2 class="text-xl font-semibold text-gray-800">Total Closed Tickets</h2>
+            <p class="text-shadow-gray-700 mt-2 text-xl" id="closed-tickets">0</p>
+        </li>
+    </ul>
+    
+    <a href="/tickets">
+        <button class="bg-(--color-primary-light) text-white px-(--space-xl) py-(--space-sm) rounded-md font-semibold cursor-pointer hover:bg-(--color-primary) transition-colors">
+            Manage Tickets
+        </button>
+    </a>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script type="module">
+import { AuthContext } from "../../js/context/authContext.js";
+import { getTickets, initTickets } from "../../js/context/ticketContext.js";
+
+document.addEventListener('DOMContentLoaded', () => {
+    initTickets();
+    
+    const user = AuthContext.getUser();
+    const tickets = getTickets();
+    
+    // Update user name
+    if (user && user.name) {
+        document.getElementById('user-name').textContent = user.name;
+    }
+    
+    // Update ticket stats
+    document.getElementById('total-tickets').textContent = tickets.length;
+    document.getElementById('open-tickets').textContent = tickets.filter(t => t.status === 'open').length;
+    document.getElementById('inprogress-tickets').textContent = tickets.filter(t => t.status === 'in_progress').length;
+    document.getElementById('closed-tickets').textContent = tickets.filter(t => t.status === 'closed').length;
+});
+</script>
+{% endblock %}

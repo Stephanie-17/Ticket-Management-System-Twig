@@ -1,13 +1,13 @@
 <?php
-// Since index.php is now in src/, paths change:
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Ensure cache directory exists
 $cacheDir = __DIR__ . '/../cache';
 if (!is_dir($cacheDir)) {
     mkdir($cacheDir, 0755, true);
 }
 
-// Templates are now in the same directory (src/templates)
+// Templates are in the same src directory
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
 $twig = new \Twig\Environment($loader, [
     'cache' => $cacheDir,
